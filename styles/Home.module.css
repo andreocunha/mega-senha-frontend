@@ -8,6 +8,11 @@
   height: 100vh;
 }
 
+.givingHints {
+  color: #0070f3;
+
+}
+
 .main {
   padding: 5rem 0;
   flex: 1;
