@@ -7,10 +7,7 @@ export default function Home() {
   const [nickname, setNickname] = useState('');
   const [players, setPlayers] = useState([]);
   const [word, setWord] = useState('');
-  const [playerState, setPlayerStatus] = useState({
-      givingHints: false,
-      guessing: false
-  })
+
 
   useEffect(() => {
     socket.on('allplayers', data => {
@@ -31,8 +28,6 @@ export default function Home() {
     setWord('')
     socket.emit('startGame'); 
   }
-
-
 
   return (
     <div className={styles.container}>
@@ -58,15 +53,23 @@ export default function Home() {
             players &&
             players.map((data, index) => {
 
-              return <p key={index} 
-                className={data.givingHints && styles.givingHints || data.guessing && 'guessing' || ''}
-              >{data.nickname} - {data.givingHints && 'AQUI'}</p>
+              return (
+                <p 
+                  key={index}
+                  className={ 
+                    data.givingHints && styles.givingHints ||
+                    data.guessing && styles.guessing
+                  }
+                >
+                  {data.nickname} - {data.givingHints && 'Dando a dica' || data.guessing && 'Descobrindo a palavra'}
+                </p>
+                
+              )
             })
           }
 
         </div>
       </main>
-
     </div>
   )
 }
