@@ -2,6 +2,7 @@ import Head from 'next/head'
 import styles from '../styles/Home.module.css'
 import socket from '../services/socketio';
 import { useEffect, useState } from 'react';
+import { Status } from '../../backend/Player';
 
 export default function Home() {
   const [nickname, setNickname] = useState('');
@@ -17,6 +18,14 @@ export default function Home() {
   useEffect(() => {
     socket.on('allplayers', data => {
       setPlayers(data);
+
+      console.log(data);
+
+      if(data.length > 0){
+        let player = data.find(player => player.id === socket.id)
+        player?.status === Status.HINTING ? setIsHinting(true) : setIsHinting(false)
+        player?.status === Status.GUESSING ? setIsGuessing(true) : setIsGuessing(false) 
+      }
     });
 
     socket.on('word', data => {
@@ -104,20 +113,16 @@ export default function Home() {
           {
             players &&
             players.map((data, index) => {
-              // data.givingHints && setIsHinting(true)
-              // data.guessing && setIsGuessing(true)
-
               return (
                 <p 
                   key={index}
                   className={ 
-                    data.givingHints && styles.givingHints ||
-                    data.guessing && styles.guessing
+                    data.status === Status.HINTING && styles.givingHints ||
+                    data.status === Status.GUESSING && styles.guessing
                   }
                 >
-                  {data.nickname} - {data.givingHints && 'Dando a dica' || data.guessing && 'Descobrindo a palavra'}
+                  {data.nickname} - {data.status === Status.HINTING && 'Dando a dica' || data.status === Status.GUESSING && 'Descobrindo a palavra'}
                 </p>
-                
               )
             })
           }
