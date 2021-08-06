@@ -1,8 +1,8 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import Head from 'next/head';
+import styles from '../styles/Home.module.css';
 import socket from '../services/socketio';
 import { useEffect, useState } from 'react';
-import { Status } from '../../backend/Player';
+import { Status } from 'player-mega-senha';
 
 export default function Home() {
   const [nickname, setNickname] = useState('');
