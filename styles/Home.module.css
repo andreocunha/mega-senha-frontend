@@ -8,6 +8,10 @@
   height: 100vh;
 }
 
+.spectating{
+  color: #000000;
+}
+
 .givingHints {
   color: #0070f3;
 }
