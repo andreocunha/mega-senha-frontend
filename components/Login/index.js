@@ -1,6 +1,18 @@
 import styles from '../../styles/components/Login.module.css';
+import socket from '../../services/socketio';
 
 export function Login({ nickname, setNickname, setIsLoggedIn }){
+
+    function handleLogin(){
+        if(nickname === ''){
+            alert('Escreva um nickname!');
+        }
+        else{
+            socket.emit('newPlayer', nickname);
+            setIsLoggedIn(true);
+        }
+    }
+
     return(
         <div className={styles.container}>
             <h1>Digite o nickname</h1>
@@ -13,7 +25,7 @@ export function Login({ nickname, setNickname, setIsLoggedIn }){
             />
 
             <button
-                onClick={() => setIsLoggedIn(true)}
+                onClick={() => handleLogin()}
             >Login</button>
         </div>
     )

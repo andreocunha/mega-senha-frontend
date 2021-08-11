@@ -1,23 +1,13 @@
 import Head from 'next/head';
+import { useState} from 'react';
 import socket from '../services/socketio';
 import styles from '../styles/Home.module.css';
-import { useState, useEffect} from 'react';
 import { Login } from '../components/Login';
 import MainGame from '../components/MainGame';
 
 export default function Home() {
   const [nickname, setNickname] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      login();
-    }
-  }, [nickname])
-
-  function login(){
-    nickname && socket.emit('newPlayer', nickname);
-  }
 
   return (
     <div className={styles.container}>
