@@ -1,14 +1,14 @@
-import Head from 'next/head';
 import { useRouter } from 'next/router'
-import { useEffect, useState, useContext} from 'react';
-import { GlobalContext } from '../context/GlobalContext'
+import { useEffect, useState} from 'react';
 import socket from '../services/socketio';
 import { Status } from 'player-mega-senha';
 import styles from '../styles/Home.module.css';
+import { usePlayer } from '../hooks/usePlayer';
 
 export default function Home() {
+
+  const { nickname, isLoggedIn } = usePlayer();
   const router = useRouter();
-  const { nickname, isLoggedIn } = useContext(GlobalContext);
   const [players, setPlayers] = useState([]);
   const [word, setWord] = useState('');
   const [guess, setGuess] = useState('');
@@ -19,28 +19,31 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push('/login')
+      router.push("/login");
     }
 
-    socket.on('allplayers', data => {
+    socket.on("allplayers", (data) => {
       setPlayers(data);
 
-      if(data.length > 0){
-        let player = data.find(player => player.id === socket.id)
-        player?.status === Status.HINTING ? setIsHinting(true) : setIsHinting(false)
-        player?.status === Status.GUESSING ? setIsGuessing(true) : setIsGuessing(false) 
+      if (data.length > 0) {
+        let player = data.find((player) => player.id === socket.id);
+        player?.status === Status.HINTING
+          ? setIsHinting(true)
+          : setIsHinting(false);
+        player?.status === Status.GUESSING
+          ? setIsGuessing(true)
+          : setIsGuessing(false);
       }
     });
 
-    socket.on('word', data => {
+    socket.on("word", (data) => {
       setWord(data);
     });
 
-    socket.on('allHints', data => {
+    socket.on("allHints", (data) => {
       setHints(data);
     });
-
-  },[])
+  }, [isLoggedIn, router]);
 
   function startGame(){
     setWord('')

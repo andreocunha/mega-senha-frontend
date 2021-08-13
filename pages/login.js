@@ -1,12 +1,11 @@
-import { useContext } from 'react';
 import { useRouter } from 'next/router'
-import { GlobalContext } from '../context/GlobalContext'
 import styles from '../styles/Login.module.css';
 import socket from '../services/socketio';
+import { usePlayer } from '../hooks/usePlayer';
 
 export default function Login(){
   const router = useRouter();
-  const { nickname, setNickname, setIsLoggedIn } = useContext(GlobalContext);
+  const { nickname, setNickname, setIsLoggedIn } = usePlayer();
 
     function handleLogin(){
         if(nickname === ''){
