@@ -1,7 +1,12 @@
-import styles from '../../styles/components/Login.module.css';
-import socket from '../../services/socketio';
+import { useContext } from 'react';
+import { useRouter } from 'next/router'
+import { GlobalContext } from '../context/GlobalContext'
+import styles from '../styles/Login.module.css';
+import socket from '../services/socketio';
 
-export function Login({ nickname, setNickname, setIsLoggedIn }){
+export default function Login(){
+  const router = useRouter();
+  const { nickname, setNickname, setIsLoggedIn } = useContext(GlobalContext);
 
     function handleLogin(){
         if(nickname === ''){
@@ -10,6 +15,8 @@ export function Login({ nickname, setNickname, setIsLoggedIn }){
         else{
             socket.emit('newPlayer', nickname);
             setIsLoggedIn(true);
+
+            router.push('/');
         }
     }
 
