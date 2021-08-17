@@ -3,16 +3,18 @@ import styles from '../styles/Login.module.css';
 import socket from '../services/socketio';
 import { usePlayer } from '../hooks/usePlayer';
 import Button from '../components/commons/button';
+import { LoginWrapper } from '../components/LoginWrapper/styles';
+import { LoginImage } from '../components/LoginImage/styles';
 
-export default function Login(){
-  const router = useRouter();
-  const { nickname, setNickname, setIsLoggedIn } = usePlayer();
+export default function Login() {
+    const router = useRouter();
+    const { nickname, setNickname, setIsLoggedIn } = usePlayer();
 
-    function handleLogin(){
-        if(nickname === ''){
+    function handleLogin() {
+        if (nickname === '') {
             alert('Escreva um nickname!');
         }
-        else{
+        else {
             socket.emit('newPlayer', nickname);
             setIsLoggedIn(true);
 
@@ -20,8 +22,10 @@ export default function Login(){
         }
     }
 
-    return(
-        <div className={styles.container}>
+    return (
+        <LoginWrapper>
+            <LoginImage />
+
             <h1>Digite o nickname</h1>
 
             <input
@@ -34,6 +38,6 @@ export default function Login(){
             <Button
                 onClick={() => handleLogin()}
             >Entrar</Button>
-        </div>
-    )
+        </LoginWrapper>
+    );
 }
