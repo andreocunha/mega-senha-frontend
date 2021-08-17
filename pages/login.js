@@ -2,6 +2,7 @@ import { useRouter } from 'next/router'
 import styles from '../styles/Login.module.css';
 import socket from '../services/socketio';
 import { usePlayer } from '../hooks/usePlayer';
+import Button from '../components/commons/button';
 
 export default function Login(){
   const router = useRouter();
@@ -30,9 +31,9 @@ export default function Login(){
                 onChange={(e) => setNickname(e.target.value)}
             />
 
-            <button
+            <Button
                 onClick={() => handleLogin()}
-            >Login</button>
+            >Entrar</Button>
         </div>
     )
 }
