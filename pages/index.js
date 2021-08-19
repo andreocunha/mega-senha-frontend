@@ -1,19 +1,18 @@
-import { useRouter } from 'next/router'
-import { useEffect, useState} from 'react';
-import socket from '../services/socketio';
-import { Status } from 'player-mega-senha';
-import styles from '../styles/Home.module.css';
-import { usePlayer } from '../hooks/usePlayer';
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import socket from "../services/socketio";
+import { Status } from "player-mega-senha";
+import styles from "../styles/Home.module.css";
+import { usePlayer } from "../hooks/usePlayer";
 
 export default function Home() {
-
   const { nickname, isLoggedIn } = usePlayer();
   const router = useRouter();
   const [players, setPlayers] = useState([]);
-  const [word, setWord] = useState('');
-  const [guess, setGuess] = useState('');
+  const [word, setWord] = useState("");
+  const [guess, setGuess] = useState("");
   const [hints, setHints] = useState([]);
-  const [sendWordHint, setSendWordHint] = useState('');
+  const [sendWordHint, setSendWordHint] = useState("");
   const [isHinting, setIsHinting] = useState(false);
   const [isGuessing, setIsGuessing] = useState(false);
 
@@ -45,83 +44,76 @@ export default function Home() {
     });
   }, [isLoggedIn, router]);
 
-  function startGame(){
-    setWord('')
-    socket.emit('startGame'); 
+  function startGame() {
+    setWord("");
+    socket.emit("startGame");
   }
 
-  function sendGuess(){
-    socket.emit('guess', guess);
+  function sendGuess() {
+    socket.emit("guess", guess);
   }
 
-  function sendHint(){
-    socket.emit('hints', sendWordHint);
+  function sendHint() {
+    socket.emit("hints", sendWordHint);
   }
 
   return (
     <>
       <h1>{nickname}</h1>
-      <h1>{ !isGuessing && word}</h1>
-      {
-        isGuessing &&
-      <>
-        <h3>Digite a palavra secreta</h3>
-        <input 
-          value={guess}
-          onChange={(e) => setGuess(e.target.value)}
-        />
+      <h1>{!isGuessing && word}</h1>
+      {isGuessing && (
+        <>
+          <h3>Digite a palavra secreta</h3>
+          <input value={guess} onChange={(e) => setGuess(e.target.value)} />
 
-        <button onClick={() => sendGuess()}>Enviar a palavra secreta</button>
+          <button onClick={() => sendGuess()}>Enviar a palavra secreta</button>
         </>
-      }
+      )}
 
-
-      { isHinting &&
+      {isHinting && (
         <>
           <h3>Digite até 3 dicas</h3>
-          <input 
+          <input
             value={sendWordHint}
             onChange={(e) => setSendWordHint(e.target.value)}
           />
-  
+
           <button onClick={() => sendHint()}>Enviar dica</button>
         </>
-      }
-
+      )}
 
       <br></br>
       <br></br>
       <button onClick={() => startGame()}>Start Game</button>
 
-
       <div>
-        {
-          players &&
+        {players &&
           players.map((data, index) => {
             return (
-              <p 
+              <p
                 key={index}
-                className={ 
-                  data.status === Status.HINTING && styles.givingHints ||
-                  data.status === Status.GUESSING && styles.guessing ||
-                  data.status === Status.SPECTATING && styles.spectating
+                className={
+                  (data.status === Status.HINTING && styles.givingHints) ||
+                  (data.status === Status.GUESSING && styles.guessing) ||
+                  (data.status === Status.SPECTATING && styles.spectating)
                 }
               >
-                {data.nickname} - {data.status === Status.HINTING && 'Dando a dica' || data.status === Status.GUESSING && 'Descobrindo a palavra'}
+                {data.nickname} -{" "}
+                {(data.status === Status.HINTING && "Dando a dica") ||
+                  (data.status === Status.GUESSING && "Descobrindo a palavra")}
               </p>
-            )
-          })
-        }
-
+            );
+          })}
       </div>
 
-        <div style={{ overflowY: 'scroll', height: 200, width: 300}}>
-          {hints && hints.map((hint, index) => {
-            return <p key={index}>{hint}</p>
+      <div style={{ overflowY: "scroll", height: 200, width: 300 }}>
+        {hints &&
+          hints.map((hint, index) => {
+            return <p key={index}>{hint}</p>;
           })}
-        </div>
+      </div>
     </>
-  )
+  );
 
   // return (
   //   <div className={styles.container}>
@@ -134,7 +126,7 @@ export default function Home() {
   //     <main className={styles.main}>
 
   //       {isLoggedIn ? <MainGame nickname={nickname} /> : (
-  //         <Login 
+  //         <Login
   //           nickname={nickname}
   //           setNickname={setNickname}
   //           setIsLoggedIn={setIsLoggedIn}
