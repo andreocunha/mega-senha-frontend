@@ -8,7 +8,7 @@ import Logo from '../../public/logo.svg';
 
 export function LoginForm({ handleLogin, nickname, setNickname }) {
   return (
-    <LoginFormWrapper>
+    <LoginFormWrapper onSubmit={handleLogin}>
       <Image src={Logo} alt="Scuba Senha" />
       <LoginField>
         <Text variant="title" tag="h2">
@@ -20,7 +20,7 @@ export function LoginForm({ handleLogin, nickname, setNickname }) {
           onChange={(e) => setNickname(e.target.value)}
           placeholder="geremias_novinha_killer"
         />
-        <Button onClick={handleLogin}>Entrar</Button>
+        <Button>Entrar</Button>
       </LoginField>
     </LoginFormWrapper>
   );

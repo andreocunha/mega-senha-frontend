@@ -9,14 +9,16 @@ export default function Login() {
   const router = useRouter();
   const { nickname, setNickname, setIsLoggedIn } = usePlayer();
 
-  function handleLogin() {
+  function handleLogin(e) {
+    e.preventDefault();
+
     if (nickname === "") {
       alert("Escreva um nickname!");
     } else {
       socket.emit("newPlayer", nickname);
       setIsLoggedIn(true);
 
-      router.push("/");
+      router.push('/lobby'); 
     }
   }
 
