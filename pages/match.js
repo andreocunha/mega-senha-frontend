@@ -70,13 +70,29 @@ export default function Match() {
       }).then((result) => {
         if (result.isConfirmed) {
           setWinner('none');
-          route.push('/lobby')
+          router.push('/lobby')
         }
       });
     });
 
-    socket.on("endRound", (hints) => {
-      console.log("O jogo acabou! Hints:", hints);
+    socket.on("endRound", () => {
+      console.log("O jogo acabou!");
+
+      Swal.fire({
+        title: `Acabou o tempo... Vamos mais uma partida?`,
+        showDenyButton: true,
+        confirmButtonText: `Vamos :)`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setWinner('none');
+          router.push('/lobby')
+        }
+        else {
+          router.push('/lobby')
+        }
+      });
+
+      // router.push('/lobby');
     });
 
     socket.on('word', (word) => {
