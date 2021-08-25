@@ -21,6 +21,11 @@ export const ButtonWrapper = styled.button`
         pointer-events: none;
         opacity: 0.5;
       `
+    } else {
+      return css`
+        pointer-events: all;
+        opacity: 1;
+      `;
     }
   }}
 `;

@@ -18,5 +18,6 @@ const VariantMap = {
 
 export const TextWrapper = styled.span`
   ${({ variant }) => VariantMap[variant]}
-  text-align: ${({ center }) => center ? 'center' : 'start' };
+  text-align: ${({ align }) => align || 'start'};
+  color: ${({ color }) => color};
 `;
