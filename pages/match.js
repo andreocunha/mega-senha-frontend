@@ -14,19 +14,31 @@ import { Chat } from "../components/Chat";
 import { InputChat } from "../components/InputChat";
 import { SendButton } from "../components/SendButton";
 import { usePlayer } from "../hooks/usePlayer";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import socket from "../services/socketio";
+import Swal from "sweetalert2";
+import Lottie from "lottie-react";
+import congratulations from '../animations/congratulations.json';
+import { route } from "next/dist/next-server/server/router";
 
 export default function Match() {
-  const { players, isLoggedIn, word, nickname, setPlayer, player } = usePlayer();
+  const { players, isLoggedIn, word, nickname, setPlayer, player, setPlayers } =
+    usePlayer();
+  const [playersByScore, setPlayersByScore] = useState([]);
   const router = useRouter();
-  const [input, setInput] = useState('');
-  const isGuessing = player?.status === 'guessing';
-  const isHinting = player?.status === 'hinting';
-  const isSpectating = player?.status === 'spectating';
+  const [input, setInput] = useState("");
+  const tipsAndKicks = useRef(null);
+  const [tips, setTips] = useState([]);
+  const [kicks, setKicks] = useState([]);
+  const isGuessing = player?.status === "guessing";
+  const isHinting = player?.status === "hinting";
+  const isSpectating = player?.status === "spectating";
+  const hasMinPlayers = players.length >= 2;
+  const [winner, setWinner] = useState('none');
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !hasMinPlayers) {
       return router.push("/login");
     }
 
@@ -35,27 +47,65 @@ export default function Match() {
     setPlayer(player);
   }, []);
 
-  const [tips, setTips] = useState([
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-  ]);
+  useEffect(() => {
+    const newPlayerByScore = players.sort((player, playerold) => {
+      if (player.score > playerold.score) {
+        return -1;
+      }
+      if (player.score < playerold.score) {
+        return 1;
+      }
+    });
+    setPlayersByScore(newPlayerByScore);
+  }, [players]);
 
-  const [kicks, setKicks] = useState([
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-    "bolo",
-    "Testing",
-  ]);
+  useEffect(() => {
+    socket.on("correct", (players) => {
+      setPlayers(players);
+      setWinner('block');
+      Swal.fire({
+        title: `Obaa! ${getGuessingPlayer()?.nickname} acertou a palavra secreta! Vamos jogar outra partida?`,
+        showDenyButton: true,
+        confirmButtonText: `Vamos :)`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setWinner('none');
+          route.push('/lobby')
+        }
+      });
+    });
+
+    socket.on("endRound", (hints) => {
+      console.log("O jogo acabou! Hints:", hints);
+    });
+
+    socket.on('word', (word) => {
+      router.push('/');
+    })
+  }, []);
+
+  useEffect(() => {
+    socket.on("allHints", (hints) => {
+      console.log("Hints", hints);
+
+      setTips(hints);
+    });
+
+    socket.on("allGuess", (guess) => {
+      console.log("Guess", guess);
+
+      setKicks(guess);
+    });
+  }, [])
+
+  useEffect(() => {
+    if (tipsAndKicks) {
+      const tipAndKick = tipsAndKicks.current;
+      if (tipAndKick) {
+        tipAndKick.scrollTop = tipAndKick.scrollHeight;
+      }
+    }
+  }, [tips]);
 
   function getGuessingPlayer() {
     const guessingPlayer = players.filter(
@@ -74,86 +124,113 @@ export default function Match() {
   }
 
   function handleSendWord() {
+    console.log('Enviei a mensagem.')
     const word = input;
 
+    if (!word) {
+      return Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Escreva alguma palavra antes de enviar :D",
+      });
+    }
+
     if (isGuessing) {
-      setKicks([...kicks, word]);
+      console.log('Chutando');
+      socket.emit("guess", word);
+      return setInput("");
     } else if (isHinting) {
-      setTips([...tips, word]);
+      console.log('Dando dica');
+      socket.emit("hints", word);
+      return setInput("");
     }
   }
 
   return (
-    <MatchWrapper>
-      <RankingMatch>
-        <Text tag="h1" variant="title" align="start" color="white">
-          Ranking
-        </Text>
-        {players.map((player) => {
-          return (
-            <>
-              <Player width="100%" key={player.id} score={player.score}>
-                {player.nickname}
-              </Player>
-            </>
-          );
-        })}
-      </RankingMatch>
-      <MatchPlaying>
-        <Text tag="p" variant="title" align="center">
-          00: 30
-        </Text>
-
-        {!isGuessing &&
-          <Text tag="p" variant="title" align="center">
-          A palavra secreta é: {word}
-          </Text>
-        }
-
-        <PlayersPlaying>
-          <Guess>
-            <Text tag="h2" variant="title">
-              Dando dicas
+    <>
+      {isLoggedIn && (
+        <MatchWrapper>
+          <RankingMatch>
+            <Text tag="h1" variant="title" align="start" color="white">
+              Ranking
             </Text>
-            <Player score={getGuessingPlayer()?.score}>
-              {getGuessingPlayer().nickname}
-            </Player>
-          </Guess>
-
-          <Hiting>
-            <Text tag="h2" variant="title" align="end">
-              Adivinhando
+            {playersByScore.map((player) => {
+              return (
+                <>
+                  <Player width="100%" key={player.id} score={player.score}>
+                    {player.nickname}
+                  </Player>
+                </>
+              );
+            })}
+          </RankingMatch>
+          <MatchPlaying>
+            <Text tag="p" variant="title" align="center">
+              00: 30
             </Text>
-            <Player score={getHintingPlayer()?.score}>
-              {getHintingPlayer().nickname}
-            </Player>
-          </Hiting>
-        </PlayersPlaying>
 
-        <TipsAndKicksWrapper>
-          {tips.map((tip, index) => {
-            return (
-              <TipsAndKicks key={index}>
-                <Tip>
-                  <Text tag="p">Dica {index + 1}: </Text>
-                  <Text tag="p">{tip}</Text>
-                </Tip>
-                <Kick>
-                  <Text tag="p">Chute {index + 1}: </Text>
-                  <Text tag="p">{kicks[index]}</Text>
-                </Kick>
-              </TipsAndKicks>
-            );
-          })}
-        </TipsAndKicksWrapper>
+            {!isGuessing && (
+              <Text tag="p" variant="title" align="center">
+                A palavra secreta é: {word}
+              </Text>
+            )}
 
-        {!isSpectating &&
-          <Chat >
-            <InputChat value={input} onChange={(e) => setInput(e.target.value)} />
-            <SendButton onClick={handleSendWord}>Enviar</SendButton>
-          </Chat>
-        }
-      </MatchPlaying>
-    </MatchWrapper>
+            <PlayersPlaying>
+              <Guess>
+                <Text tag="h2" variant="title">
+                  Dando dicas
+                </Text>
+                <Player score={getGuessingPlayer()?.score}>
+                  {getHintingPlayer()?.nickname}
+                </Player>
+              </Guess>
+
+              <Hiting>
+                <Text tag="h2" variant="title" align="end">
+                  Adivinhando
+                </Text>
+                <Player score={getHintingPlayer()?.score}>
+                  {getGuessingPlayer()?.nickname}
+                </Player>
+              </Hiting>
+            </PlayersPlaying>
+
+            <TipsAndKicksWrapper ref={tipsAndKicks}>
+              {tips.map((tip, index) => {
+                return (
+                  <TipsAndKicks key={index}>
+                    <Tip>
+                      <Text tag="p">Dica {index + 1}: </Text>
+                      <Text tag="p">{tip}</Text>
+                    </Tip>
+                    <Kick>
+                      <Text tag="p">Chute {index + 1}: </Text>
+                      <Text tag="p">{kicks[index]}</Text>
+                    </Kick>
+                  </TipsAndKicks>
+                );
+              })}
+            </TipsAndKicksWrapper>
+
+            {!isSpectating && (
+              <Chat>
+                <InputChat
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                />
+                <SendButton onClick={handleSendWord}>Enviar</SendButton>
+              </Chat>
+            )}
+          </MatchPlaying>
+        </MatchWrapper>
+      )}
+      <Lottie style={{
+        position: 'absolute',
+        top: '0',
+        width: '100%',
+        height: '100%',
+        display: `${winner}`,
+      }} animationData={congratulations} />
+    </>
   );
 }

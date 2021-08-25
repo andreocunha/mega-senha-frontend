@@ -13,30 +13,12 @@ export function PlayerContext({ children }) {
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [word, setWord] = useState("");
-  const [players, setPlayers] = useState([
-    {
-      id: 0,
-      nickname: "Mateus",
-      score: 1,
-      status: "spectating",
-    },
-    {
-      id: 1,
-      nickname: "Pedro",
-      score: 1,
-      status: "hinting",
-    },
-    {
-      id: 2,
-      nickname: "Ana",
-      score: 1,
-      status: "guessing",
-    },
-  ]);
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     socket.on("allplayers", (playersSocket) => {
       setPlayers(playersSocket);
+      console.log(playersSocket);
     });
 
     socket.on("word", (word) => {

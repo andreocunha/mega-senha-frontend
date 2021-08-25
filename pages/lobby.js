@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 import Button from "../components/commons/button";
 import { Player } from "../components/commons/player";
 import { Text } from "../components/commons/text";
@@ -10,7 +11,8 @@ import socket from "../services/socketio";
 export default function Lobby() {
   const router = useRouter();
   const { isLoggedIn, players } = usePlayer();
-  const playersExists = players.length !== 0;
+  const hasPlayers = players.length !== 0;
+  const hasMinPlayers = players.length >= 2;
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -20,12 +22,17 @@ export default function Lobby() {
     socket.on('word', () => {
       router.push("/match");
     })
-  }, [isLoggedIn]);
+  }, []);
 
   function handleStartGame() {
 
-    if (players.length < 2) {
-      return alert('É necessário ter no minímo dois jogadores para iniciar uma partida.')
+    if (!hasMinPlayers) {
+
+      return Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "É necessário ter no minímo dois jogadores para iniciar uma partida! Chame alguns amigos :D",
+      });
     } 
 
     socket.emit('startGame');
@@ -37,18 +44,16 @@ export default function Lobby() {
         Jogadores na sala
       </Text>
 
-      {playersExists ?
-        (
-          players.map((player) => {
-            return <Player key={player.id}>{player.nickname}</Player>;
-          })
-        ) :
-        (
-          <Text as="p" align="center" variant="auxText">
-            Nenhum player na partida
-          </Text>
+      {hasPlayers ? (
+        players.map((player) => {
+          return <Player key={player.id}>{player.nickname}</Player>;
+        })
+      ) : (
+        <Text as="p" align="center" variant="auxText">
+          Nenhum player na partida
+        </Text>
       )}
-      <Button disabled={!playersExists} onClick={() => handleStartGame()}>
+      <Button disabled={!hasPlayers} onClick={() => handleStartGame()}>
         Iniciar partida
       </Button>
     </LobbyWrapper>

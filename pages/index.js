@@ -10,6 +10,10 @@ export default function Home() {
     if (!isLoggedIn) {
       router.push("/login");
     }
+
+    if (isLoggedIn) {
+      router.push('/match');
+    }
   }, []);
 
   return (
