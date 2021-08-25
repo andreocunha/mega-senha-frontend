@@ -20,6 +20,7 @@ import socket from "../services/socketio";
 import Swal from "sweetalert2";
 import Lottie from "lottie-react";
 import congratulations from '../animations/congratulations.json';
+import timer from '../animations/timer.json';
 import { route } from "next/dist/next-server/server/router";
 
 export default function Match() {
@@ -165,9 +166,7 @@ export default function Match() {
             })}
           </RankingMatch>
           <MatchPlaying>
-            <Text tag="p" variant="title" align="center">
-              00: 30
-            </Text>
+            <Lottie animationData={timer}  />
 
             {!isGuessing && (
               <Text tag="p" variant="title" align="center">
@@ -224,13 +223,16 @@ export default function Match() {
           </MatchPlaying>
         </MatchWrapper>
       )}
-      <Lottie style={{
-        position: 'absolute',
-        top: '0',
-        width: '100%',
-        height: '100%',
-        display: `${winner}`,
-      }} animationData={congratulations} />
+      <Lottie
+        style={{
+          position: "absolute",
+          top: "0",
+          width: "100%",
+          height: "100%",
+          display: `${winner}`,
+        }}
+        animationData={congratulations}
+      />
     </>
   );
 }
