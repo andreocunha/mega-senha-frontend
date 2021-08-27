@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 
 export default function Login() {
   const router = useRouter();
-  const { nickname, setNickname, setIsLoggedIn } = usePlayer();
+  const { nickname, setNickname, setIsLoggedIn, players } = usePlayer();
 
   function handleLogin(e) {
     e.preventDefault();
@@ -18,6 +18,12 @@ export default function Login() {
         icon: "error",
         title: "Oops...",
         text: "Insira um nickname para entrar no lobby :D",
+      });
+    } else if (players.some((player) => player.nickname === nickname)) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Ja há um player com o mesmo nickname que o seu! Escolha um nickname diferente :D",
       });
     } else {
       socket.emit("newPlayer", nickname);

@@ -22,6 +22,14 @@ export default function Lobby() {
     socket.on('word', () => {
       router.push("/match");
     })
+
+    socket.emit('status');
+
+    socket.on("statusGame", (status) => {
+      if (status) {
+        router.push('/match')
+      }
+    });
   }, []);
 
   function handleStartGame() {
