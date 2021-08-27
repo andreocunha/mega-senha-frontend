@@ -29,6 +29,8 @@ export default function Match() {
     word,
     nickname,
     setPlayer,
+    setPlayers,
+    setWord,
     player,
     setIsLoggedIn,
   } = usePlayer();
@@ -56,6 +58,15 @@ export default function Match() {
   }, []);
 
   useEffect(() => {
+    socket.emit('restart')
+
+    socket.on('restarted', (players) => {
+      setPlayers(players);
+      setRound(1);
+    });
+  }, [])
+
+  useEffect(() => {
     socket.emit("round");
 
     socket.on("allRounds", (round) => {
@@ -76,14 +87,24 @@ export default function Match() {
   }, [players]);
 
   useEffect(() => {
-    socket.on("correct", (players) => {
+    socket.on("correct", (players, round, newWord) => {
+      setPlayers(players);
+      setRound(round);
+      setWord(newWord);
+      setKicks([]);
+      setTips([]);
+      setPlayer(players.find((player) => player.nickname === nickname));
+      Swal.fire({
+        title: 'Certa resposta!'
+      })
+    });
+
+    socket.on('lastRound', () => {
       if (isLoggedIn) {
         setWinner("block");
         Swal.fire({
           title: "Partida encerrada!",
-          text: `Obaa! O(a) jogador(a) ${
-            getGuessingPlayer()?.nickname
-          } acertou a palavra secreta! Vamos outro round?`,
+          text: `Obaa! Parabéns ao(a) ganhador(a): ${getWinnerPlayer()}, vamos outra partida?`,
           showCancelButton: true,
           confirmButtonColor: "#3085d6",
           cancelButtonColor: "#d33",
@@ -100,27 +121,29 @@ export default function Match() {
           }
         });
       }
-    });
+    })
 
     socket.on("endRound", () => {
       if (isLoggedIn) {
-        Swal.fire({
-          title: "Partida encerrada!",
-          text: `O tempo acabou... Vamos outro round?`,
-          showCancelButton: true,
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-          confirmButtonText: "Sim, vamos :D",
-          cancelButtonText: "Agora não",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            router.push("/lobby");
-          }
+        if (!round > 4) {
+          Swal.fire({
+            title: "Partida encerrada!",
+            text: `O tempo acabou... O(a) player é  Vamos outro round?`,
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim, vamos :D",
+            cancelButtonText: "Agora não",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push("/lobby");
+            }
 
-          if (result.isDismissed) {
-            window.location.href = "/";
-          }
-        });
+            if (result.isDismissed) {
+              window.location.href = "/";
+            }
+          });
+        }
       }
     });
   }, []);
@@ -160,7 +183,9 @@ export default function Match() {
     return hintingPlayer[0];
   }
 
-  function handleSendWord() {
+  function handleSendWord(e) {
+    e.preventDefault();
+
     const wordSended = input;
     const hasSpaces = () => wordSended.indexOf(" ") >= 0;
 
@@ -191,6 +216,19 @@ export default function Match() {
       socket.emit("hints", wordSended);
       return setInput("");
     }
+  }
+
+  function getWinnerPlayer() {
+   const newPlayerByScore = players.sort((player, playerold) => {
+     if (player.score > playerold.score) {
+       return -1;
+     }
+     if (player.score < playerold.score) {
+       return 1;
+     }
+   });
+
+    return newPlayerByScore[0]?.nickname;
   }
 
   function getMyStatus() {
@@ -276,12 +314,12 @@ export default function Match() {
             </TipsAndKicksWrapper>
 
             {!isSpectating && (
-              <Chat>
+              <Chat onSubmit={handleSendWord}>
                 <InputChat
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                 />
-                <SendButton onClick={handleSendWord}>Enviar</SendButton>
+                <SendButton>Enviar</SendButton>
               </Chat>
             )}
           </MatchPlaying>

@@ -33,6 +33,7 @@ export function PlayerContext({ children }) {
         setNickname,
         setIsLoggedIn,
         players,
+        setWord,
         setPlayers,
         word,
         player,

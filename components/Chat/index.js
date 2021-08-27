@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { breakpointsMedia } from "../../utils/breakpointsMedia";
 
-export const Chat = styled.section`
+export const Chat = styled.form`
   width: 70vw;
   position: absolute;
   bottom: 0;

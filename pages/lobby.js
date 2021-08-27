@@ -12,7 +12,7 @@ export default function Lobby() {
   const router = useRouter();
   const { isLoggedIn, players } = usePlayer();
   const hasPlayers = players.length !== 0;
-  const hasMinPlayers = players.length >= 2;
+  const hasMinPlayers = players.length >= 3;
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -37,7 +37,7 @@ export default function Lobby() {
       return Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "É necessário ter no mínimo dois jogadores para iniciar uma partida! Chame alguns amigos :D",
+        text: "É necessário ter no mínimo três jogadores para iniciar uma partida! Chame alguns amigos :D",
       });
     }
 
