@@ -20,6 +20,7 @@ import socket from "../services/socketio";
 import Swal from "sweetalert2";
 import Lottie from "lottie-react";
 import congratulations from "../animations/congratulations.json";
+import { PlayersWrapper } from "../components/PlayersWrapper";
 
 export default function Match() {
   const {
@@ -104,7 +105,7 @@ export default function Match() {
     
     
 
-    socket.on("endRound", () => {
+    /* socket.on("endRound", () => {
       if (isLoggedIn) {
         Swal.fire({
           title: "Partida encerrada!",
@@ -124,7 +125,7 @@ export default function Match() {
           }
         });
       }
-    });
+    }); */
   }, []);
 
   useEffect(() => {
@@ -232,15 +233,19 @@ export default function Match() {
             <Text tag="h1" variant="title" align="start" color="white">
               Ranking
             </Text>
-            {playersByScore.map((player) => {
-              return (
-                <>
-                  <Player width="100%" key={player.id} score={player.score}>
-                    {player.nickname}
-                  </Player>
-                </>
-              );
-            })}
+
+            <PlayersWrapper>
+              {playersByScore.map((player) => {
+                return (
+                  <>
+                    <Player width="100%" key={player.id} score={player.score}>
+                      {player.nickname}
+                    </Player>
+                  </>
+                );
+              })}
+            </PlayersWrapper>
+            
           </RankingMatch>
           <MatchPlaying>
             <Text tag="p" variant="title" align="center"></Text>
@@ -292,7 +297,6 @@ export default function Match() {
                 <InputChat
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  
                 />
                 <SendButton onClick={handleSendWord}>Enviar</SendButton>
               </Chat>

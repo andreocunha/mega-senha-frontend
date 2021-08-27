@@ -19,31 +19,29 @@ export default function Lobby() {
       router.push("/login");
     }
 
-    socket.on('word', () => {
+    socket.on("word", () => {
       router.push("/match");
-    })
+    });
 
-    socket.emit('status');
+    socket.emit("status");
 
     socket.on("statusGame", (status) => {
       if (status) {
-        router.push('/match')
+        router.push("/match");
       }
     });
   }, []);
 
   function handleStartGame() {
-
     if (!hasMinPlayers) {
-
       return Swal.fire({
         icon: "error",
         title: "Oops...",
         text: "É necessário ter no mínimo dois jogadores para iniciar uma partida! Chame alguns amigos :D",
       });
-    } 
+    }
 
-    socket.emit('startGame');
+    socket.emit("startGame");
   }
 
   return (
@@ -52,6 +50,8 @@ export default function Lobby() {
         Jogadores na sala
       </Text>
 
+      
+      
       {hasPlayers ? (
         players.map((player) => {
           return <Player key={player.id}>{player.nickname}</Player>;
@@ -61,6 +61,7 @@ export default function Lobby() {
           Nenhum player na partida
         </Text>
       )}
+
       <Button disabled={!hasPlayers} onClick={() => handleStartGame()}>
         Iniciar partida
       </Button>

@@ -9,8 +9,8 @@ export const RankingMatch = styled.aside`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 85px;
-  padding: 85px 30px 0 30px;
+  justify-content: center;
+  padding: 40px 30px;
 
   h1 {
     margin-bottom: 48px;
