@@ -42,6 +42,8 @@ export default function Match() {
   const isSpectating = player?.status === "spectating";
   const hasMinPlayers = players.length >= 2;
   const [winner, setWinner] = useState("none");
+  const [round, setRound] = useState(0);
+  const [canSend, setCanSend] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn || !hasMinPlayers) {
@@ -52,6 +54,14 @@ export default function Match() {
 
     setPlayer(player);
   }, []);
+
+  useEffect(() => {
+    socket.emit("round");
+
+    socket.on("allRounds", (round) => {
+      setRound(round)
+    })
+  }, [])
 
   useEffect(() => {
     const newPlayerByScore = players.sort((player, playerold) => {
@@ -67,9 +77,10 @@ export default function Match() {
 
   useEffect(() => {
     socket.on("correct", (players) => {
+      setWinner("block");
       Swal.fire({
         title: "Partida encerrada!",
-        text: `Obaa! O(a) jogador(a) ${getGuessingPlayer()?.nickname} acertou a palavra secreta! Vamos outra partida?`,
+        text: `Obaa! O(a) jogador(a) ${getGuessingPlayer()?.nickname} acertou a palavra secreta! Vamos outro round?`,
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
@@ -77,7 +88,7 @@ export default function Match() {
         cancelButtonText: "Agora não"
       }).then((result) => {
         if (result.isConfirmed) {
-          setWinner("block");
+          
           setIsLoggedIn(true);
           router.push("/lobby");
         }
@@ -85,13 +96,13 @@ export default function Match() {
         if (result.isDismissed) {
           window.location.href = "/";
         }
-      });;;
-    });;
+      });
+    });
 
     socket.on("endRound", () => {
       Swal.fire({
         title: "Partida encerrada!",
-        text: `O tempo acabou... Vamos outra partida?`,
+        text: `O tempo acabou... Vamos outro round?`,
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
@@ -105,9 +116,13 @@ export default function Match() {
         if (result.isDismissed) {
           window.location.href = "/";
         }
-      });;;
+      });
     });
   }, []);
+
+  useEffect(() => {
+    console.log(winner)
+  }, [winner])
 
   useEffect(() => {
     socket.on("allHints", (hints) => {
@@ -149,9 +164,9 @@ export default function Match() {
   }
 
   function handleSendWord() {
-    const word = input;
+    const wordSended = input;
 
-    if (!word) {
+    if (!wordSended) {
       return Swal.fire({
         icon: "error",
         title: "Oops...",
@@ -161,12 +176,39 @@ export default function Match() {
 
     if (isGuessing) {
       console.log("Chutando");
-      socket.emit("guess", word);
-      return setInput("");
+      if (tips.length > kicks.length) {
+        socket.emit("guess", wordSended);
+        return setInput("");
+      } else {
+        Swal.fire({
+          title: 'Espere uma dica para poder chutar uma palavra!'
+        })
+      }
+      
     } else if (isHinting) {
       console.log("Dando dica");
-      socket.emit("hints", word);
-      return setInput("");
+      
+        if (tips.length === 3) {
+          return Swal.fire({
+            title: "Partida encerrada!",
+            text: `O limite de dicas (3) foi atingido, iniciar novo round?`,
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sim :D",
+            cancelButtonText: "Agora não",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              router.push("/lobby");
+            }
+
+            if (result.isDismissed) {
+              window.location.href = "/";
+            }
+          });
+        }
+        socket.emit("hints", wordSended);
+        return setInput("");
     }
   }
 
@@ -186,9 +228,10 @@ export default function Match() {
         <MatchWrapper>
           <RankingMatch>
             <Text tag="p" variant="title" color="#dddd">
-              
-              Agora você é: {getMyStatus()}{" "}{" "}
-           
+              Agora você é: {getMyStatus()}{" "}
+            </Text>
+            <Text tag="p" variant="title" color="#dddd">
+              Round: {round}
             </Text>
             <Text tag="h1" variant="title" align="start" color="white">
               Ranking
@@ -253,6 +296,7 @@ export default function Match() {
                 <InputChat
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  
                 />
                 <SendButton onClick={handleSendWord}>Enviar</SendButton>
               </Chat>
