@@ -121,19 +121,11 @@ export default function Match() {
   }, []);
 
   useEffect(() => {
-    console.log(winner)
-  }, [winner])
-
-  useEffect(() => {
     socket.on("allHints", (hints) => {
-      console.log("Hints", hints);
-
       setTips(hints);
     });
 
     socket.on("allGuess", (guess) => {
-      console.log("Guess", guess);
-
       setKicks(guess);
     });
   }, []); 
@@ -175,7 +167,6 @@ export default function Match() {
     }
 
     if (isGuessing) {
-      console.log("Chutando");
       if (tips.length > kicks.length) {
         socket.emit("guess", wordSended);
         return setInput("");
@@ -186,8 +177,6 @@ export default function Match() {
       }
       
     } else if (isHinting) {
-      console.log("Dando dica");
-      
         if (tips.length === 3) {
           return Swal.fire({
             title: "Partida encerrada!",

@@ -18,7 +18,6 @@ export function PlayerContext({ children }) {
   useEffect(() => {
     socket.on("allplayers", (playersSocket) => {
       setPlayers(playersSocket);
-      console.log(playersSocket);
     });
 
     socket.on("word", (word) => {

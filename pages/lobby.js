@@ -39,7 +39,7 @@ export default function Lobby() {
       return Swal.fire({
         icon: "error",
         title: "Oops...",
-        text: "É necessário ter no minímo dois jogadores para iniciar uma partida! Chame alguns amigos :D",
+        text: "É necessário ter no mínimo dois jogadores para iniciar uma partida! Chame alguns amigos :D",
       });
     } 
 
