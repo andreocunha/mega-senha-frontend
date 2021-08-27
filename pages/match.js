@@ -197,8 +197,15 @@ export default function Match() {
     }
 
     if (isGuessing) {
-      socket.emit("guess", wordSended);
-      return setInput("");
+      if (kicks < tips) {
+        socket.emit("guess", wordSended);
+        return setInput("");
+      } else {
+        Swal.fire({
+          title: "Aguarde a dica!",
+        });
+      }
+      
     } else if (isHinting) {
       if (wordSended.toLowerCase() === word.toLowerCase()) {
         return Swal.fire({
@@ -274,7 +281,7 @@ export default function Match() {
                 <Text tag="h2" variant="title">
                   Dando dicas
                 </Text>
-                <Player score={getGuessingPlayer()?.score}>
+                <Player score={getHintingPlayer()?.score}>
                   {getHintingPlayer()?.nickname}
                 </Player>
               </Guess>
@@ -283,7 +290,7 @@ export default function Match() {
                 <Text tag="h2" variant="title" align="end">
                   Adivinhando
                 </Text>
-                <Player score={getHintingPlayer()?.score}>
+                <Player score={getGuessingPlayer()?.score}>
                   {getGuessingPlayer()?.nickname}
                 </Player>
               </Hiting>
