@@ -44,7 +44,6 @@ export default function Match() {
   const hasMinPlayers = players.length >= 2;
   const [winner, setWinner] = useState("none");
   const [round, setRound] = useState(0);
-  const [canSend, setCanSend] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn || !hasMinPlayers) {
@@ -60,9 +59,9 @@ export default function Match() {
     socket.emit("round");
 
     socket.on("allRounds", (round) => {
-      setRound(round)
-    })
-  }, [])
+      setRound(round);
+    });
+  }, []);
 
   useEffect(() => {
     const newPlayerByScore = players.sort((player, playerold) => {
@@ -101,11 +100,9 @@ export default function Match() {
           }
         });
       }
-      });
-    
-    
+    });
 
-    /* socket.on("endRound", () => {
+    socket.on("endRound", () => {
       if (isLoggedIn) {
         Swal.fire({
           title: "Partida encerrada!",
@@ -125,7 +122,7 @@ export default function Match() {
           }
         });
       }
-    }); */
+    });
   }, []);
 
   useEffect(() => {
@@ -136,7 +133,7 @@ export default function Match() {
     socket.on("allGuess", (guess) => {
       setKicks(guess);
     });
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (tipsAndKicks) {
@@ -165,6 +162,7 @@ export default function Match() {
 
   function handleSendWord() {
     const wordSended = input;
+    const hasSpaces = () => wordSended.indexOf(" ") >= 0;
 
     if (!wordSended) {
       return Swal.fire({
@@ -174,38 +172,24 @@ export default function Match() {
       });
     }
 
-    if (isGuessing) {
-      if (tips.length > kicks.length) {
-        socket.emit("guess", wordSended);
-        return setInput("");
-      } else {
-        Swal.fire({
-          title: 'Espere uma dica para poder chutar uma palavra!'
-        })
-      }
-      
-    } else if (isHinting) {
-        if (tips.length === 3) {
-          return Swal.fire({
-            title: "Partida encerrada!",
-            text: `O limite de dicas (3) foi atingido, iniciar novo round?`,
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sim :D",
-            cancelButtonText: "Agora não",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              router.push("/lobby");
-            }
+    if (hasSpaces()) {
+      return Swal.fire({
+        title: "Envie apenas palavras!",
+      });
+    }
 
-            if (result.isDismissed) {
-              window.location.href = "/";
-            }
-          });
-        }
-        socket.emit("hints", wordSended);
-        return setInput("");
+    if (isGuessing) {
+      socket.emit("guess", wordSended);
+      return setInput("");
+    } else if (isHinting) {
+      if (wordSended.toLowerCase() === word.toLowerCase()) {
+        return Swal.fire({
+          title: "Cuidado, não envie a palavra secreta!",
+        });
+      }
+
+      socket.emit("hints", wordSended);
+      return setInput("");
     }
   }
 
@@ -245,7 +229,6 @@ export default function Match() {
                 );
               })}
             </PlayersWrapper>
-            
           </RankingMatch>
           <MatchPlaying>
             <Text tag="p" variant="title" align="center"></Text>

@@ -50,8 +50,6 @@ export default function Lobby() {
         Jogadores na sala
       </Text>
 
-      
-      
       {hasPlayers ? (
         players.map((player) => {
           return <Player key={player.id}>{player.nickname}</Player>;
