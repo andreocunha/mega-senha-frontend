@@ -77,46 +77,53 @@ export default function Match() {
 
   useEffect(() => {
     socket.on("correct", (players) => {
-      setWinner("block");
-      Swal.fire({
-        title: "Partida encerrada!",
-        text: `Obaa! O(a) jogador(a) ${getGuessingPlayer()?.nickname} acertou a palavra secreta! Vamos outro round?`,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, vamos :D",
-        cancelButtonText: "Agora não"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          
-          setIsLoggedIn(true);
-          router.push("/lobby");
-        }
+      if (isLoggedIn) {
+        setWinner("block");
+        Swal.fire({
+          title: "Partida encerrada!",
+          text: `Obaa! O(a) jogador(a) ${
+            getGuessingPlayer()?.nickname
+          } acertou a palavra secreta! Vamos outro round?`,
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sim, vamos :D",
+          cancelButtonText: "Agora não",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setIsLoggedIn(true);
+            router.push("/lobby");
+          }
 
-        if (result.isDismissed) {
-          window.location.href = "/";
-        }
+          if (result.isDismissed) {
+            window.location.href = "/";
+          }
+        });
+      }
       });
-    });
+    
+    
 
     socket.on("endRound", () => {
-      Swal.fire({
-        title: "Partida encerrada!",
-        text: `O tempo acabou... Vamos outro round?`,
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sim, vamos :D",
-        cancelButtonText: "Agora não"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          router.push("/lobby");
-        }
+      if (isLoggedIn) {
+        Swal.fire({
+          title: "Partida encerrada!",
+          text: `O tempo acabou... Vamos outro round?`,
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sim, vamos :D",
+          cancelButtonText: "Agora não",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            router.push("/lobby");
+          }
 
-        if (result.isDismissed) {
-          window.location.href = "/";
-        }
-      });
+          if (result.isDismissed) {
+            window.location.href = "/";
+          }
+        });
+      }
     });
   }, []);
 
