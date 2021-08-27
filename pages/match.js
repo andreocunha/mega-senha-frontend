@@ -118,10 +118,11 @@ export default function Match() {
 
     socket.on("endRound", () => {
       if (isLoggedIn) {
-        if (!round > 4) {
+          console.log('acabou o round')
+
           Swal.fire({
             title: "Partida encerrada!",
-            text: `O tempo acabou... O(a) player é  Vamos outro round?`,
+            text: `O tempo acabou... O(a) player ${getWinnerPlayer()} foi o que mais marcou pontos nessa partida! Vamos outra partida? :D`,
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
@@ -137,7 +138,6 @@ export default function Match() {
             }
           });
         }
-      }
     });
   }, []);
 
