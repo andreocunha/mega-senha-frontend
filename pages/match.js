@@ -58,15 +58,6 @@ export default function Match() {
   }, []);
 
   useEffect(() => {
-    socket.emit('restart')
-
-    socket.on('restarted', (players) => {
-      setPlayers(players);
-      setRound(1);
-    });
-  }, [])
-
-  useEffect(() => {
     socket.emit("round");
 
     socket.on("allRounds", (round) => {
@@ -88,6 +79,7 @@ export default function Match() {
 
   useEffect(() => {
     socket.on("correct", (players, round, newWord) => {
+      console.log(players)
       setPlayers(players);
       setRound(round);
       setWord(newWord);
@@ -113,6 +105,7 @@ export default function Match() {
         }).then((result) => {
           if (result.isConfirmed) {
             setIsLoggedIn(true);
+            socket.emit('restart')
             router.push("/lobby");
           }
 
