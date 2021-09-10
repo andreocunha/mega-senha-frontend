@@ -21,6 +21,7 @@ import Swal from "sweetalert2";
 import Lottie from "lottie-react";
 import congratulations from "../animations/congratulations.json";
 import { PlayersWrapper } from "../components/PlayersWrapper";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 export default function Match() {
   const {
@@ -46,6 +47,7 @@ export default function Match() {
   const hasMinPlayers = players.length >= 2;
   const [winner, setWinner] = useState("none");
   const [round, setRound] = useState(0);
+  const [countdown, setCountdown] = useState(60);
 
   useEffect(() => {
     if (!isLoggedIn || !hasMinPlayers) {
@@ -90,6 +92,16 @@ export default function Match() {
         title: 'Certa resposta!'
       })
     });
+
+    socket.on('pulou', (players, round, newWord) => {
+
+      setPlayers(players);
+      setRound(round);
+      setWord(newWord);
+      setKicks([]);
+      setTips([]);
+      setPlayer(players.find((player) => player.nickname === nickname));
+    })
 
     socket.on('lastRound', () => {
       if (isLoggedIn) {
@@ -182,6 +194,15 @@ export default function Match() {
     const wordSended = input;
     const hasSpaces = () => wordSended.indexOf(" ") >= 0;
 
+    if (wordSended === 'pular') {
+      setCountdown(60);
+      socket.emit('pular');
+      setInput("");
+      return Swal.fire({
+        title: "Round pulado!",
+      });
+    }
+
     if (!wordSended) {
       return Swal.fire({
         icon: "error",
@@ -269,6 +290,7 @@ export default function Match() {
             </PlayersWrapper>
           </RankingMatch>
           <MatchPlaying>
+
             <Text tag="p" variant="title" align="center"></Text>
             {!isGuessing && (
               <Text tag="p" variant="title" align="center">
